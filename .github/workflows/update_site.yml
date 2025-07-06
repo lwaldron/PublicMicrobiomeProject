@@ -37,8 +37,6 @@ jobs:
         run: python update_commit_log.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Copy main page
-        run: cp index.md . # Ensure the main index file is available
       - name: List files in the workspace
         run: ls -R
       - name: Setup Pages
