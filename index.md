@@ -6,7 +6,7 @@ This site automatically tracks a curated list of GitHub projects and their recen
 
 * **[Project List](./projects.html)**: A table of all repositories found for the tracked topic.
 
-* **[Recent Commits](./commit-log.md)**: A blog-style feed of the latest commits from all listed projects.
+* **[Recent Commits](./commit-log.html)**: A blog-style feed of the latest commits from all listed projects.
 
 ## Abstract
 

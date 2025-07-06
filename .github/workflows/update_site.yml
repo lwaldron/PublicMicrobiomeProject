@@ -37,8 +37,11 @@ jobs:
         run: python update_commit_log.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Rename index.md to index.html
-        run: mv index.md index.html
+      - name: Convert Markdown files to HTML
+        uses: jaywcjain/markdown-to-html-action@v2
+        with:
+          source: 'index.md,commit-log.md'
+          output: 'index.html,commit-log.html'
       - name: List files in the workspace
         run: ls -R
       - name: Setup Pages
