@@ -37,11 +37,10 @@ jobs:
         run: python update_commit_log.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Convert Markdown files to HTML
-        uses: jaywcjain/markdown-to-html-action@v2
-        with:
-          source: 'index.md,commit-log.md'
-          output: 'index.html,commit-log.html'
+      - name: Convert Markdown to HTML using pandoc
+        run: |
+          pandoc -s -o index.html index.md
+          pandoc -s -o commit-log.html commit-log.md
       - name: List files in the workspace
         run: ls -R
       - name: Setup Pages
