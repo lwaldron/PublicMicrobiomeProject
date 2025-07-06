@@ -5,45 +5,56 @@ on:
     - cron: '0 4 * * *'  # Runs every day at 4 AM UTC
   workflow_dispatch: # Allows manual triggering
 
+# Set permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  build-and-deploy:
+  # Build job
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # Required to push to the gh-pages branch
-
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run script to update project list
+        run: python update_projects.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run script to update commit log
+        run: python update_commit_log.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Copy main page
+        run: cp index.md . # Ensure the main index file is available
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload all generated files from the root directory
+          path: '.'
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Run script to update project list
-      run: python update_projects.py
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Run script to update commit log
-      run: python update_commit_log.py
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Copy index file to root
-      run: cp index.md index.html # Assuming your main page is index.md or index.html
-
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: . # Publish the root directory
-        publish_branch: gh-pages # The branch to deploy to
-        user_name: 'GitHub Actions Bot'
-        user_email: 'actions-bot@github.com'
-        commit_message: "Automated update of project and commit logs"
-        # Keep only the latest commit on the gh-pages branch
-        force_orphan: true 
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
