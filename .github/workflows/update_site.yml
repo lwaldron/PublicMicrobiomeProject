@@ -37,6 +37,8 @@ jobs:
         run: python update_commit_log.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
       - name: Convert Markdown to HTML using pandoc
         run: |
           pandoc -s -o index.html index.md
